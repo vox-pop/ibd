@@ -1,0 +1,262 @@
+2)
+a)
+SELECT P.DNI, P.Apellido, P.Nombre, P.Fecha_Nacimiento,
+CASE P.Genero
+WHEN 'F'
+THEN 'FEMENINO'
+WHEN 'M'
+THEN 'MASCULINO'
+ELSE 'NULL'
+END AS genero_sex, 'Alumno' AS roll
+FROM persona p
+JOIN alumno a ON ( a.dni = p.dni )
+UNION
+SELECT P.DNI, P.Apellido, P.Nombre, P.Fecha_Nacimiento,
+CASE P.Genero
+WHEN 'F'
+THEN 'FEMENINO'
+WHEN 'M'
+THEN 'MASCULINO'
+ELSE 'NULL'
+END AS genero_sex, 'Profesor' AS roll
+FROM persona p
+JOIN profesor a ON ( a.dni = p.dni )
+
+b)
+select p.dni,p.apellido,p.nombre,pp.matricula
+from persona p
+join profesor pp on(pp.dni=p.dni)
+where 3<=(select count(t.cod_titulo)as cantidad
+from titulo t
+join titulo_profesor pt on(pt.cod_titulo=t.cod_titulo)
+join persona p on(p.dni=pt.dni))
+
+order by p.apellido,p.nombre MALL
+
+SELECT p.dni, p.apellido, p.nombre, pp.matricula, count( pt.cod_titulo ) AS cant
+FROM persona p
+JOIN titulo_profesor pt ON ( pt.dni = p.dni )
+JOIN profesor pp ON ( pp.dni = p.dni )
+GROUP BY p.dni
+HAVING 3 <= cant
+ORDER BY p.apellido, p.nombre NO HAY QUE PROYECTAR LA CANTIDAD !!
+
+SELECT p.dni, p.apellido, p.nombre, pp.matricula
+FROM persona p
+JOIN titulo_profesor pt ON ( pt.dni = p.dni )
+JOIN profesor pp ON ( pp.dni = p.dni )
+GROUP BY p.dni
+HAVING 3 <= count( pt.cod_titulo )
+ORDER BY p.apellido, p.nombre  BIENNN !!
+
+EL COUNT PUEDE IR DENTRO DEL HAVING
+
+c)
+SELECT p.dni, p.apellido, p.nombre, sum( c.duracion ) AS cant_horas, avg( c.duracion ) AS promedio_horas
+FROM persona p
+JOIN profesor pp ON ( pp.dni = p.dni )
+JOIN profesor_curso pf ON ( pf.dni = pp.dni )
+JOIN curso c ON ( c.cod_curso = pf.cod_curso )
+GROUP BY p.dni
+ORDER BY p.apellido, p.nombre
+
+d)
+SELECT p.dni, p.apellido, p.nombre, ac.calificacion
+FROM persona p
+JOIN alumno_curso ac ON ( ac.dni = p.dni )
+JOIN curso c ON ( ac.cod_curso = c.cod_curso )
+JOIN profesor_curso pc ON ( pc.cod_curso = c.cod_curso )
+JOIN profesor pp ON ( pp.dni = pc.dni )
+JOIN persona per ON ( per.dni = pp.dni )
+WHERE (
+ac.calificacion >5
+)
+AND (
+per.apellido = 'Rodrigues'
+)
+
+select p.dni,p.apellido,p.nombre,ac.calificacion
+from persona p
+join alumno_curso ac on(ac.dni=p.dni)
+where(ac.calificacion>5)and (ac.Cod_Curso IN 
+(SELECT Cod_Curso
+from persona pp 
+join profesor_curso pc on(pp.dni = pc.dni)
+where (pp.apellido = 'Rodrigues'))
+
+
+f)preguntar !
+
+SELECT p.dni, p.apellido, p.nombre, a.legajo, a.anio_ingreso
+FROM persona p
+JOIN alumno a ON ( a.dni = p.dni )
+JOIN alumno_curso ac ON ( ac.dni = a.dni )
+RIGHT JOIN curso c ON ( c.cod_curso = ac.cod_curso ) MALL
+
+SELECT p.dni, p.apellido, p.nombre, a.legajo, a.anio_ingreso
+FROM persona p
+JOIN alumno a ON ( a.dni = p.dni )
+JOIN alumno_curso ac ON ( ac.dni = a.dni )
+GROUP BY p.dni
+HAVING count( p.dni ) = (
+SELECT count( cod_curso )
+FROM curso )   BIENN
+
+e)
+ SELECT *
+FROM curso
+WHERE duracion = (
+SELECT min( duracion )
+FROM curso )
+UNION
+SELECT *
+FROM curso
+WHERE duracion = (
+SELECT max( duracion )
+FROM curso ) 
+
+
+3)d)
+SELECT c.dni, c.apellido, c.nombre
+FROM cliente c
+JOIN embarque e ON ( e.nro_cliente = c.nro_cliente )
+JOIN ciudad ciud ON ( ciud.nro_ciudad = e.nro_ciudad )
+WHERE (
+c.tipo_cliente = 'Minorista'
+)
+AND (
+ciud.nombre LIKE 'C%'
+)
+ORDER BY c.apellido, c.nombre
+
+e)
+SELECT c.nombre, c.poblacion
+FROM ciudad c
+JOIN embarque e ON ( e.nro_ciudad = c.nro_ciudad )
+WHERE (
+e.peso >=1000
+)
+ORDER BY c.nombre
+
+f)
+SELECT c.nombre
+FROM ciudad c
+JOIN embarque e ON ( e.nro_ciudad = c.nro_ciudad )
+JOIN cliente cli ON ( cli.nro_cliente = e.nro_cliente )
+WHERE (
+cli.renta_anual >10000
+)
+or (
+c.poblacion >30000
+)
+
+g)
+select c.dni,c.apellido,c.nombre,c.renta_anual
+from cliente c join
+embarque e on(e.nro_cliente=c.nro_cliente)
+where (e.nro_camion =all(
+select ca.nro_camion
+from camion ca))
+order by c.apellido,c.nombre  MALLL
+
+SELECT c.dni, c.apellido, c.nombre, c.renta_anual, count( e.nro_Camion ) AS camiones
+FROM cliente c
+JOIN embarque e ON ( c.nro_cliente = e.nro_cliente )
+GROUP BY c.dni
+HAVING camiones = (
+SELECT count( nro_Camion )
+FROM camion )
+
+SELECT c.dni, c.apellido, c.nombre, c.renta_anual
+FROM cliente c
+JOIN embarque e ON ( c.nro_cliente = e.nro_cliente )
+GROUP BY c.dni
+HAVING count( DISTINCT e.nro_Camion ) = (
+SELECT count( nro_Camion )
+FROM camion )
+
+h)
+ SELECT avg( e.peso )
+FROM embarque e
+JOIN ciudad c ON ( c.nro_ciudad = e.nro_ciudad )
+WHERE (
+c.poblacion <30000
+) 
+
+i)
+select c.dni,c.apellido,c.nombre,sum(e.peso)as total
+from cliente c join 
+embarque e on(c.nro_cliente=e.nro_cliente)
+group by c.dni
+having (1000<total)   NO TIENE QUE PROYECTAR EL PESO!
+
+SELECT c.dni, c.apellido, c.nombre
+FROM cliente c
+JOIN embarque e ON ( c.nro_cliente = e.nro_cliente )
+GROUP BY c.dni
+HAVING ( 1000 < sum( e.peso ) ) BIENN !
+
+SELECT c.dni, c.apellido, c.nombre
+FROM cliente c
+JOIN embarque e ON ( c.nro_cliente = e.nro_cliente )
+GROUP BY c.dni
+HAVING sum( e.peso ) >1000
+
+
+
+select c.dni,c.apellido,c.nombre,c.nro_cliente
+from cliente c join 
+embarque e on(c.nro_cliente=e.nro_cliente)
+where (1000<(select sum(e.peso)
+from cliente cl
+join embarque em on(cl.nro_cliente=em.nro_cliente)
+) and() )  MALLL
+
+select c.dni,c.apellido,c.nombre
+from cliente c
+join embarque e on(e.nro_cliente=c.nro_cliente)
+where 1000<all(select em.peso
+from embarque em
+join cliente cc on(cc.nro_cliente=em.nro_cliente)
+join )
+order by c.apellido,c.nombre
+
+SELECT DISTINCT c.dni, c.apellido, c.nombre
+FROM cliente c
+JOIN embarque e ON ( e.nro_cliente = c.nro_cliente )
+WHERE 1000 < (
+SELECT sum( em.peso )
+FROM embarque em
+WHERE c.nro_cliente = em.nro_cliente )
+ORDER BY c.apellido, c.nombre     BIENNN
+
+j)
+SELECT c.nombre
+FROM ciudad c
+JOIN embarque e ON ( e.nro_ciudad = c.nro_ciudad )
+WHERE e.nro_cliente =
+ALL (
+
+SELECT cl.nro_cliente
+FROM cliente cl
+)  MALLL
+
+SELECT c.nombre, count( e.nro_cliente ) AS cant_cliente
+FROM embarque e
+JOIN ciudad c ON ( c.nro_ciudad = e.nro_ciudad )
+GROUP BY c.nombre
+HAVING cant_cliente = (
+SELECT count( c.nro_cliente ) AS cant_socios
+FROM cliente c ) BIENN
+
+k)
+SELECT c.dni, c.apellido, c.nombre, count( e.nro_embarque ) AS cant_emb_enviados, avg( e.peso ) AS peso_promedio
+FROM cliente c
+LEFT JOIN embarque e ON ( e.nro_cliente = c.nro_cliente )
+GROUP BY c.dni
+
+l)
+SELECT c.nombre, max( e.peso ) AS peso_max
+FROM ciudad c
+LEFT JOIN embarque e ON ( e.nro_ciudad = c.nro_ciudad )
+GROUP BY c.nombre
