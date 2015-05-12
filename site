@@ -24,7 +24,7 @@ def build():
     data['files'].sort(key = lambda k: k['date'])
 
     tpl = FileLoader('./').load_template('layout.html')
-    out = bytes(tpl.render(data), 'utf-8')
+    out = bytes(tpl.render(data))
     
     open('./index.html', 'wb').write(out)
     print("Done!")
